@@ -1,0 +1,2 @@
+{% extends "base.html" %}
+{% block content %}<section class="card auth"><span class="eyebrow">PEDIDO #{{ pedido.pk }}</span><h1>Tem certeza que deseja cancelar esse pedido?</h1><p>{{ pedido.refeicao.nome }} · O cancelamento é definitivo.</p><form method="post">{% csrf_token %}<button class="danger full" name="confirmar" value="sim">Sim, cancelar pedido</button></form><a class="outline button full" href="{% url 'home' %}">Voltar sem cancelar</a></section>{% endblock %}

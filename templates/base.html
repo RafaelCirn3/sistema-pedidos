@@ -1,0 +1,12 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{% block title %}Mesa | Pedidos{% endblock %}</title><link rel="stylesheet" href="{% static 'css/app.css' %}"></head>
+<body>
+<header><nav class="wrap nav"><a class="brand" href="{% url 'home' %}"><span class="brand-icon">M</span> Mesa<span class="accent">.</span></a>{% if user.is_authenticated %}<div class="account"><span>{{ user.get_full_name|default:user.username }}</span><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="outline" type="submit">Sair</button></form></div>{% endif %}</nav></header>
+<main class="wrap">
+{% for message in messages %}<div class="notice {{ message.tags }}" role="status">{{ message }}</div>{% endfor %}
+{% block content %}{% endblock %}
+</main>
+<footer class="wrap">Mesa · Sistema de pedidos de refeições</footer>
+</body></html>
