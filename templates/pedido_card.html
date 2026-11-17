@@ -12,7 +12,7 @@
       {% if papel == 'cozinha' %}<form method="post" action="{% url 'entregar' pedido.pk %}">{% csrf_token %}<button class="primary">Confirmar entrega</button></form>{% endif %}
       <a class="danger button" href="{% url 'cancelar' pedido.pk %}">Cancelar</a>
     {% elif pedido.status == 'ENTREGUE' and papel == 'cliente' and not pedido.avaliacao %}
-      <a class="primary button" href="{% url 'avaliar' pedido.pk %}">Avaliar refeição</a>
+      <a class="primary button" href="{% url 'avaliar' pedido.pk %}{% if request.resolver_match.url_name == 'home' %}?origem=home{% endif %}">Avaliar refeição</a>
     {% endif %}
   </div></div>
 </article>

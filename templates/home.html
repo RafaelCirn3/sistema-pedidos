@@ -3,7 +3,7 @@
 {% block content %}
 <section class="hero"><span class="eyebrow">{% if papel == 'cozinha' %}PAINEL DA COZINHA{% else %}ÁREA DO CLIENTE{% endif %}</span>
 <h1>{% if papel == 'cozinha' %}Fila de pedidos{% else %}Olá, {{ user.first_name|default:user.username }}!{% endif %}</h1><p>{% if papel == 'cozinha' %}Organize os pedidos e confirme as entregas em um só lugar.{% else %}Escolha sua refeição e acompanhe seu pedido.{% endif %}</p></section>
-<div class="card stat pending-summary"><span>Pedidos pendentes</span><strong>{{ pendentes }}</strong></div>
+<div class="active-summary"><div class="card stat pending-summary"><span>Pedidos pendentes</span><strong>{{ pendentes }}</strong></div>{% if papel == 'cliente' %}<div class="card stat pending-summary"><span>Aguardando avaliação</span><strong>{{ aguardando_avaliacao }}</strong></div>{% endif %}</div>
 {% if papel == 'cozinha' %}<div class="menu-toolbar"><a class="primary button" href="{% url 'cardapio' %}">Gerenciar cardápio</a></div>{% endif %}
 {% if papel == 'cliente' %}
 <section><h2>Cardápio disponível</h2><div class="grid">{% for refeicao in refeicoes %}<article class="card meal">
@@ -20,8 +20,8 @@
 </dialog>
 <script src="{% static 'js/confirmar-pedido.js' %}" defer></script>
 {% endif %}
-<section><div class="section-head"><h2>Pedidos pendentes</h2><a class="outline button" href="?">Atualizar</a></div>
-<div class="orders">{% for pedido in pedidos %}{% include "pedido_card.html" %}{% empty %}<div class="card empty"><h3>Nenhum pedido pendente.</h3><p>Os novos pedidos aparecerão nesta área. Consulte o <a href="{% url 'historico' %}">histórico de pedidos</a> para ver os finalizados.</p></div>{% endfor %}</div>
+<section><div class="section-head"><h2>{% if papel == 'cliente' %}Pedidos pendentes e avaliações{% else %}Pedidos pendentes{% endif %}</h2><a class="outline button" href="?">Atualizar</a></div>
+<div class="orders">{% for pedido in pedidos %}{% include "pedido_card.html" %}{% empty %}<div class="card empty"><h3>{% if papel == 'cliente' %}Nenhum pedido pendente ou aguardando avaliação.{% else %}Nenhum pedido pendente.{% endif %}</h3><p>Os novos pedidos aparecerão nesta área. Consulte o <a href="{% url 'historico' %}">histórico de pedidos</a> para ver os finalizados.</p></div>{% endfor %}</div>
 {% include "pedido_paginacao.html" %}</section>
 {% if papel == 'cozinha' %}<script>setTimeout(function(){ if (!document.hidden) location.reload(); }, 30000);</script>{% endif %}
 {% endblock %}

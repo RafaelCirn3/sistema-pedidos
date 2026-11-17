@@ -89,7 +89,7 @@ class FluxoTest(TestCase):
         url = reverse("historico")
         self.client.force_login(self.cliente)
         for filtro in ("", "ENTREGUE", "CANCELADO", "avaliados"):
-            self.assertEqual(list(self.client.get("/", {"status": filtro}).context["pedidos"]), [self.pedido])
+            self.assertEqual(list(self.client.get("/", {"status": filtro}).context["pedidos"]), [self.pedido, entregue])
         resposta = self.client.get(url)
         self.assertEqual(list(resposta.context["pedidos"]), [avaliado, cancelado, entregue])
         self.assertContains(resposta, "Minha avaliação")
@@ -106,6 +106,18 @@ class FluxoTest(TestCase):
 
     def test_historico_requer_login(self):
         self.assertRedirects(self.client.get(reverse("historico")), "/entrar/?next=/pedidos/historico/")
+
+    def test_avaliar_pela_home_remove_pedido_da_fila(self):
+        transicao(self.pedido, self.cozinha, Status.ENTREGUE)
+        self.client.force_login(self.cliente)
+        resposta = self.client.get("/")
+        self.assertEqual(resposta.context["pendentes"], 0)
+        self.assertEqual(resposta.context["aguardando_avaliacao"], 1)
+        url = reverse("avaliar", args=[self.pedido.pk]) + "?origem=home"
+        self.assertContains(resposta, url)
+        self.assertRedirects(self.client.post(url, {"nota": 5}), "/")
+        self.assertEqual(list(self.client.get("/").context["pedidos"]), [])
+        self.assertEqual(list(self.client.get(reverse("historico"), {"status": "avaliados"}).context["pedidos"]), [self.pedido])
 
     def test_admin_registra_e_audita(self):
         admin = User.objects.create_superuser("admin", password="senha-teste")

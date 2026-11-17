@@ -22,7 +22,7 @@ A cozinha gerencia o cardápio em /cardapio/, incluindo fotos JPG/PNG/WebP de at
 
 Clientes solicitam refeições disponíveis, acompanham pedidos próprios e cancelam pendências. A cozinha consulta os pedidos pendentes de todos os clientes em FIFO e confirma entregas ou cancelamentos. A fila se atualiza automaticamente a cada 30 segundos enquanto visível.
 
-A aba **Histórico de pedidos** (/pedidos/historico/) reúne entregues e cancelados, com filtros de avaliações. O cliente pode avaliar entregas próprias por essa aba; a cozinha consulta o histórico de todos os clientes. A tela inicial apresenta exclusivamente pedidos pendentes.
+A aba **Histórico de pedidos** (/pedidos/historico/) reúne entregues e cancelados, com filtros de avaliações. O cliente pode avaliar entregas próprias por essa aba; a cozinha consulta o histórico de todos os clientes. A tela inicial da cozinha apresenta somente pedidos pendentes; a do cliente apresenta também entregas ainda não avaliadas, com botão para avaliar.
 
 ### Exclusões administrativas
 

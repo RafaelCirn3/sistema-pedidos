@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Case, When, Value, IntegerField, Q
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -23,13 +24,17 @@ def home(request):
     papel = perfil(request.user)
     if papel == "admin":
         return redirect("admin:index")
-    qs = consulta(request.user).filter(status=Status.PENDENTE)
+    qs = consulta(request.user)
+    pendentes = qs.filter(status=Status.PENDENTE).count()
+    aguardando_avaliacao = 0
     if papel == "cozinha":
-        qs = qs.order_by("criado_em", "id")
+        qs = qs.filter(status=Status.PENDENTE).order_by("criado_em", "id")
     else:
-        qs = qs.order_by("-criado_em", "-id")
+        aguardando_avaliacao = qs.filter(status=Status.ENTREGUE, avaliacao__isnull=True).count()
+        qs = qs.filter(Q(status=Status.PENDENTE) | Q(status=Status.ENTREGUE, avaliacao__isnull=True))
+        qs = qs.annotate(prioridade=Case(When(status=Status.PENDENTE, then=Value(0)), default=Value(1), output_field=IntegerField())).order_by("prioridade", "-criado_em", "-id")
     pagina = Paginator(qs, 30)
-    return render(request, "home.html", {"papel": papel, "pedidos": pagina.get_page(request.GET.get("page")), "refeicoes": Refeicao.objects.filter(disponivel=True).prefetch_related("opcoes"), "pendentes": pagina.count})
+    return render(request, "home.html", {"papel": papel, "pedidos": pagina.get_page(request.GET.get("page")), "refeicoes": Refeicao.objects.filter(disponivel=True).prefetch_related("opcoes"), "pendentes": pendentes, "aguardando_avaliacao": aguardando_avaliacao})
 
 @login_required
 def historico(request):
@@ -110,15 +115,16 @@ def entregar(request, pk):
 @transaction.atomic
 def avaliar(request, pk):
     exigir(request.user, "cliente")
+    retorno = "home" if request.GET.get("origem") == "home" else "historico"
     pedido = get_object_or_404(Pedido.objects.select_for_update(), pk=pk, cliente=request.user, status=Status.ENTREGUE)
     if Avaliacao.objects.filter(pedido=pedido).exists():
         messages.info(request, "Este pedido já foi avaliado.")
-        return redirect("historico")
+        return redirect(retorno)
     form = AvaliacaoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         avaliacao = form.save(commit=False)
         avaliacao.pedido = pedido
         avaliacao.save()
         messages.success(request, "Obrigado pela sua avaliação!")
-        return redirect("historico")
-    return render(request, "avaliar.html", {"pedido": pedido, "form": form})
+        return redirect(retorno)
+    return render(request, "avaliar.html", {"pedido": pedido, "form": form, "retorno": retorno})
