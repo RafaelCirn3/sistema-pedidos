@@ -6,7 +6,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(label="E-mail ou usuário", widget=forms.TextInput(attrs={"autocomplete": "username", "autofocus": True}))
+    username = forms.CharField(label="E-mail", widget=forms.TextInput(attrs={"autocomplete": "username", "autofocus": True}))
 
     def clean_username(self):
         username = self.cleaned_data["username"].strip()
