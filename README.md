@@ -26,6 +26,32 @@ A aba **Histórico de pedidos** (/pedidos/historico/) reúne entregues e cancela
 
 ## Desenvolvimento sem Docker
 
+### Dados de demonstração (seed)
+
+Após as migrations, execute apenas em ambiente de teste:
+
+```bash
+docker compose exec web python manage.py seed
+# Ou, sem Docker:
+python manage.py seed
+```
+
+O comando cria três contas de demonstração: `demo-admin` (administrador), `demo-cozinha` (cozinha) e `cliente.demo@example.test` (cliente). As senhas iniciais são aleatórias, exibidas uma única vez no terminal. Guarde-as em local seguro e não utilize essas contas em produção. O comando não redefine senhas nem promove usuários existentes.
+
+Cadastra cinco pratos, checkboxes de personalização e copia fotos ilustrativas do Wikimedia Commons, já incluídas no repositório, para o volume de mídia. Funciona offline com as fotos distribuídas; se algum arquivo estiver ausente, tenta obtê-lo da fonte original. Executar novamente não duplica pratos com o mesmo nome nem usuários. Use `--sem-imagens` para popular somente os dados.
+
+Créditos das fotografias (redimensionadas para o cardápio):
+
+| Prato | Fonte / autor | Licença |
+|---|---|---|
+| Feijoada completa | [Brazilian food Feijoada.jpg](https://commons.wikimedia.org/wiki/File:Brazilian_food_Feijoada.jpg) — Wilfredor | CC0 1.0 |
+| Peixe grelhado | [Arroz, feijão e peixe grelhado.jpg](https://commons.wikimedia.org/wiki/File:Arroz,_feij%C3%A3o_e_peixe_grelhado.jpg) — Maryleine | CC0 1.0 |
+| Macarrão à bolonhesa | [Pastabolognese.jpg](https://commons.wikimedia.org/wiki/File:Pastabolognese.jpg) — Ludraman | Domínio público |
+| Omelete da casa | [Eggs omelette.jpg](https://commons.wikimedia.org/wiki/File:Eggs_omelette.jpg) — National Cancer Institute | Domínio público |
+| Salada fresca | [Salad On Plate.jpg](https://commons.wikimedia.org/wiki/File:Salad_On_Plate.jpg) — KittensMittens4 | CC0 1.0 |
+
+### Instalação local
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
