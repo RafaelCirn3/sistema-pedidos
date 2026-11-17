@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Confirmar pedido | Mesa{% endblock %}
+{% block content %}
+<section class="card auth"><span class="eyebrow">REVISÃO DO PEDIDO</span><h1>Confirmar seu pedido?</h1><p>Confira os detalhes antes de enviar à cozinha.</p>
+<div class="pedido-resumo"><h3>{{ refeicao.nome }}</h3><p class="small">Opções selecionadas</p><ul>{% for opcao in opcoes %}<li>{{ opcao.nome }}</li>{% empty %}<li>Nenhuma opção adicional</li>{% endfor %}</ul></div>
+<form method="post" action="{% url 'novo' %}">{% csrf_token %}<input type="hidden" name="refeicao" value="{{ refeicao.pk }}">{% for opcao in opcoes %}<input type="hidden" name="opcoes" value="{{ opcao.pk }}">{% endfor %}<button class="primary full" name="confirmar" value="sim">Confirmar pedido</button></form>
+<a class="outline button full" href="{% url 'home' %}">Voltar sem enviar</a></section>
+{% endblock %}

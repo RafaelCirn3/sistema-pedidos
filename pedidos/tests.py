@@ -21,7 +21,7 @@ class FluxoTest(TestCase):
     def test_cliente_cria_e_visualiza(self):
         self.client.force_login(self.cliente)
         self.assertContains(self.client.get("/"), "Almoço")
-        self.client.post(reverse("novo"), {"refeicao": self.refeicao.pk})
+        self.client.post(reverse("novo"), {"refeicao": self.refeicao.pk, "confirmar": "sim"})
         self.assertEqual(Pedido.objects.count(), 2)
         self.assertEqual(self.pedido.historico.count(), 1)
 

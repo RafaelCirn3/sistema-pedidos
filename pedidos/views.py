@@ -40,7 +40,17 @@ def home(request):
 def novo(request):
     exigir(request.user, "cliente")
     try:
-        registrar(request.user, int(request.POST.get("refeicao", "")), opcoes_ids=[int(i) for i in request.POST.getlist("opcoes")])
+        refeicao_id = int(request.POST.get("refeicao", ""))
+        opcoes_ids = set(int(i) for i in request.POST.getlist("opcoes"))
+        if request.POST.get("confirmar") != "sim":
+            refeicao = Refeicao.objects.filter(pk=refeicao_id, disponivel=True).first()
+            if not refeicao:
+                raise ValidationError("Esta refeição não está mais disponível.")
+            opcoes = list(refeicao.opcoes.filter(pk__in=opcoes_ids))
+            if len(opcoes) != len(opcoes_ids):
+                raise ValidationError("Alguma opção não pertence a este prato ou foi removida. Atualize o cardápio.")
+            return render(request, "confirmar_pedido.html", {"refeicao": refeicao, "opcoes": opcoes})
+        registrar(request.user, refeicao_id, opcoes_ids=opcoes_ids)
         messages.success(request, "Pedido registrado! A cozinha já pode visualizá-lo.")
     except ValidationError as exc:
         messages.error(request, exc.message)

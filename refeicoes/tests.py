@@ -42,9 +42,9 @@ class CardapioTest(TestCase):
         opcao_alheia = OpcaoRefeicao.objects.create(refeicao=outro, nome="Arroz")
         self.client.force_login(self.cliente)
         self.assertContains(self.client.get("/"), "Salada")
-        self.client.post(reverse("novo"), {"refeicao": self.prato.pk, "opcoes": [opcao_alheia.pk]})
+        self.client.post(reverse("novo"), {"refeicao": self.prato.pk, "opcoes": [opcao_alheia.pk], "confirmar": "sim"})
         self.assertEqual(Pedido.objects.count(), 0)
-        self.client.post(reverse("novo"), {"refeicao": self.prato.pk, "opcoes": [self.opcao.pk]})
+        self.client.post(reverse("novo"), {"refeicao": self.prato.pk, "opcoes": [self.opcao.pk], "confirmar": "sim"})
         self.opcao.delete()
         self.assertEqual(Pedido.objects.get().opcoes_selecionadas, ["Salada"])
         self.client.force_login(self.cozinha)
@@ -65,3 +65,15 @@ class CardapioTest(TestCase):
             self.assertEqual(foto.status_code, 200)
             self.assertEqual(foto["Content-Type"], "image/png")
             foto.close()
+
+    def test_confirmacao_antes_de_registrar_pedido(self):
+        self.client.force_login(self.cliente)
+        self.assertContains(self.client.get("/"), 'id="confirmar-pedido"')
+        dados = {"refeicao": self.prato.pk, "opcoes": [self.opcao.pk]}
+        resposta = self.client.post(reverse("novo"), dados)
+        self.assertContains(resposta, "Confirmar seu pedido?")
+        self.assertContains(resposta, "Salada")
+        self.assertEqual(Pedido.objects.count(), 0)
+        dados["confirmar"] = "sim"
+        self.assertEqual(self.client.post(reverse("novo"), dados).status_code, 302)
+        self.assertEqual(Pedido.objects.get().opcoes_selecionadas, ["Salada"])

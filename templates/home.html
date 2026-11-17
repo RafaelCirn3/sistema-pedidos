@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 <section class="hero"><span class="eyebrow">{% if papel == 'cozinha' %}PAINEL DA COZINHA{% else %}ÁREA DO CLIENTE{% endif %}</span>
 <h1>{% if papel == 'cozinha' %}Fila de pedidos{% else %}Olá, {{ user.first_name|default:user.username }}!{% endif %}</h1><p>{% if papel == 'cozinha' %}Organize os pedidos e confirme as entregas em um só lugar.{% else %}Escolha sua refeição e acompanhe seu pedido.{% endif %}</p></section>
@@ -8,9 +9,16 @@
 <section><h2>Cardápio disponível</h2><div class="grid">{% for refeicao in refeicoes %}<article class="card meal">
 {% if refeicao.imagem %}<img class="meal-image" src="{% url 'prato_imagem' refeicao.pk %}" alt="{{ refeicao.nome }}" loading="lazy">{% endif %}
 <span class="eyebrow">DISPONÍVEL</span><h3>{{ refeicao.nome }}</h3><p>{{ refeicao.descricao|default:"Refeição disponível para pedido." }}</p>
-<form method="post" action="{% url 'novo' %}">{% csrf_token %}<input type="hidden" name="refeicao" value="{{ refeicao.pk }}">
+<form method="post" action="{% url 'novo' %}" class="pedido-form" data-prato="{{ refeicao.nome }}">{% csrf_token %}<input type="hidden" name="refeicao" value="{{ refeicao.pk }}"><input type="hidden" name="confirmar" value="">
 {% if refeicao.opcoes.all %}<fieldset class="meal-options"><legend>Personalize seu prato</legend>{% for opcao in refeicao.opcoes.all %}<label class="check-option"><input type="checkbox" name="opcoes" value="{{ opcao.pk }}"> {{ opcao.nome }}</label>{% endfor %}</fieldset>{% endif %}
 <button class="primary full">Solicitar refeição</button></form></article>{% empty %}<p class="card">Nenhuma refeição disponível no momento.</p>{% endfor %}</div></section>
+<dialog id="confirmar-pedido" class="pedido-modal" aria-labelledby="confirmar-titulo">
+<span class="eyebrow">REVISÃO DO PEDIDO</span>
+<h2 id="confirmar-titulo">Confirmar seu pedido?</h2><p>Confira os detalhes antes de enviar à cozinha.</p>
+<div class="pedido-resumo"><h3 id="confirmar-prato"></h3><p class="small">Opções selecionadas</p><ul id="confirmar-opcoes"></ul></div>
+<div class="modal-acoes"><button type="button" class="outline" id="voltar-pedido" autofocus>Voltar</button><button type="button" class="primary" id="enviar-pedido">Confirmar pedido</button></div>
+</dialog>
+<script src="{% static 'js/confirmar-pedido.js' %}" defer></script>
 {% endif %}
 <section><div class="section-head"><h2>{% if papel == 'cozinha' %}Todos os pedidos{% else %}Meus pedidos{% endif %}</h2><a class="outline button" href="?{% if filtro %}status={{ filtro }}{% endif %}">Atualizar</a></div>
 <nav class="filters" aria-label="Filtrar pedidos"><a class="{% if not filtro %}active{% endif %}" href="?">Todos</a>{% for valor, nome in status_choices %}<a class="{% if filtro == valor %}active{% endif %}" href="?status={{ valor }}">{{ nome }}</a>{% endfor %}</nav>
