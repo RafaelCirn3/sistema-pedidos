@@ -8,5 +8,3 @@ class AvaliacaoAdmin(admin.ModelAdmin):
     readonly_fields = ("pedido", "nota", "comentario", "criado_em")
     def has_add_permission(self, request):
         return False
-    def has_delete_permission(self, request, obj=None):
-        return False

@@ -9,8 +9,8 @@ class Status(models.TextChoices):
 
 class Pedido(models.Model):
     opcoes_selecionadas = models.JSONField(default=list, blank=True)
-    cliente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="pedidos")
-    refeicao = models.ForeignKey(Refeicao, on_delete=models.PROTECT)
+    cliente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pedidos")
+    refeicao = models.ForeignKey(Refeicao, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDENTE)
     criado_em = models.DateTimeField(auto_now_add=True)
     entregue_em = models.DateTimeField(null=True, blank=True)
@@ -28,8 +28,8 @@ class Pedido(models.Model):
         return f"#{self.pk} — {self.refeicao}"
 
 class HistoricoStatus(models.Model):
-    pedido = models.ForeignKey(Pedido, on_delete=models.PROTECT, related_name="historico")
-    responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="historico")
+    responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     status_anterior = models.CharField(max_length=10, choices=Status.choices, null=True)
     status_novo = models.CharField(max_length=10, choices=Status.choices)
     registrado_em = models.DateTimeField(auto_now_add=True)

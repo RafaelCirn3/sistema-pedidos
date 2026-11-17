@@ -34,8 +34,6 @@ class PedidoAdmin(admin.ModelAdmin):
             obj.pk = pedido.pk
             obj.criado_em = pedido.criado_em
             obj._state.adding = False
-    def has_delete_permission(self, request, obj=None):
-        return False
     def executar(self, request, queryset, destino):
         for pedido in queryset:
             try:
@@ -55,6 +53,4 @@ class HistoricoAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
     def has_change_permission(self, request, obj=None):
-        return False
-    def has_delete_permission(self, request, obj=None):
         return False

@@ -14,3 +14,9 @@ class RefeicaoAdmin(admin.ModelAdmin):
     list_display = ("nome", "disponivel")
     list_filter = ("disponivel",)
     search_fields = ("nome",)
+
+@admin.register(OpcaoRefeicao)
+class OpcaoRefeicaoAdmin(admin.ModelAdmin):
+    list_display = ("nome", "refeicao")
+    list_filter = ("refeicao",)
+    search_fields = ("nome", "refeicao__nome")

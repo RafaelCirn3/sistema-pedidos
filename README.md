@@ -24,6 +24,18 @@ Clientes solicitam refeições disponíveis, acompanham pedidos próprios e canc
 
 A aba **Histórico de pedidos** (/pedidos/historico/) reúne entregues e cancelados, com filtros de avaliações. O cliente pode avaliar entregas próprias por essa aba; a cozinha consulta o histórico de todos os clientes. A tela inicial apresenta exclusivamente pedidos pendentes.
 
+### Exclusões administrativas
+
+O Django Admin permite exclusões individuais ou em lote de pedidos, avaliações, registros de histórico, pratos, opções e perfis, conforme as permissões de exclusão do Django. A confirmação nativa do Admin lista os objetos relacionados que também serão excluídos.
+
+- Excluir um cliente remove seu perfil e seus pedidos, incluindo avaliações e histórico desses pedidos.
+- Excluir um prato remove suas opções, pedidos, avaliações e histórico dos respectivos pedidos.
+- Excluir um pedido remove suas avaliações e histórico.
+- Excluir um usuário que apenas atuou como responsável por uma alteração mantém os históricos de outros pedidos, com o campo responsável vazio.
+- Excluir uma opção não altera as escolhas já registradas nos pedidos.
+
+As cascatas são executadas pelo ORM do Django. Exclusões são definitivas; utilize a desativação de pratos/usuários para preservar dados históricos quando necessário e mantenha backups.
+
 ## Desenvolvimento sem Docker
 
 ### Dados de demonstração (seed)
