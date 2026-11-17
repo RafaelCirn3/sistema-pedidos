@@ -1,0 +1,18 @@
+<article class="card order">
+  <div>
+    <span class="muted small">PEDIDO #{{ pedido.pk }} · {{ pedido.criado_em|date:"d/m/Y H:i" }}</span>
+    <h3>{{ pedido.refeicao.nome }}</h3>
+    {% if papel == 'cozinha' %}<p>{{ pedido.cliente.get_full_name|default:pedido.cliente.username }}</p>{% endif %}
+    {% if pedido.opcoes_selecionadas %}<p class="small">Opções selecionadas:</p><div class="option-tags">{% for opcao in pedido.opcoes_selecionadas %}<span class="badge entregue">{{ opcao }}</span>{% endfor %}</div>{% endif %}
+    {% if pedido.status == 'ENTREGUE' %}<p class="small">Entregue em {{ pedido.entregue_em|date:"d/m/Y H:i" }}</p>{% elif pedido.status == 'CANCELADO' %}<p class="small">Cancelado em {{ pedido.cancelado_em|date:"d/m/Y H:i" }}</p>{% endif %}
+    {% if pedido.avaliacao %}<p class="rating">★ {{ pedido.avaliacao.nota }}/5 · Avaliado</p>{% if pedido.avaliacao.comentario %}<p class="avaliacao-comentario">{{ pedido.avaliacao.comentario }}</p>{% endif %}{% elif pedido.status == 'ENTREGUE' %}<p class="small muted">Aguardando avaliação</p>{% endif %}
+  </div>
+  <div class="order-side"><span class="badge {{ pedido.status|lower }}">{{ pedido.get_status_display }}</span><div class="actions">
+    {% if pedido.status == 'PENDENTE' %}
+      {% if papel == 'cozinha' %}<form method="post" action="{% url 'entregar' pedido.pk %}">{% csrf_token %}<button class="primary">Confirmar entrega</button></form>{% endif %}
+      <a class="danger button" href="{% url 'cancelar' pedido.pk %}">Cancelar</a>
+    {% elif pedido.status == 'ENTREGUE' and papel == 'cliente' and not pedido.avaliacao %}
+      <a class="primary button" href="{% url 'avaliar' pedido.pk %}">Avaliar refeição</a>
+    {% endif %}
+  </div></div>
+</article>

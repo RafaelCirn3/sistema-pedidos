@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Case, When, Value, IntegerField
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from avaliacoes.models import Avaliacao
@@ -23,17 +23,40 @@ def home(request):
     papel = perfil(request.user)
     if papel == "admin":
         return redirect("admin:index")
-    qs = consulta(request.user)
-    contagens = {s.lower(): qs.filter(status=s).count() for s in Status.values}
-    filtro = request.GET.get("status", "")
-    if filtro in Status.values:
-        qs = qs.filter(status=filtro)
+    qs = consulta(request.user).filter(status=Status.PENDENTE)
     if papel == "cozinha":
-        qs = qs.annotate(prioridade=Case(When(status=Status.PENDENTE, then=Value(0)), When(status=Status.ENTREGUE, then=Value(1)), default=Value(2), output_field=IntegerField())).order_by("prioridade", "criado_em", "id")
+        qs = qs.order_by("criado_em", "id")
     else:
         qs = qs.order_by("-criado_em", "-id")
-    from django.core.paginator import Paginator
-    return render(request, "home.html", {"papel": papel, "pedidos": Paginator(qs, 30).get_page(request.GET.get("page")), "refeicoes": Refeicao.objects.filter(disponivel=True).prefetch_related("opcoes"), "contagens": contagens, "filtro": filtro, "status_choices": Status.choices})
+    pagina = Paginator(qs, 30)
+    return render(request, "home.html", {"papel": papel, "pedidos": pagina.get_page(request.GET.get("page")), "refeicoes": Refeicao.objects.filter(disponivel=True).prefetch_related("opcoes"), "pendentes": pagina.count})
+
+@login_required
+def historico(request):
+    exigir(request.user, "cliente", "cozinha")
+    papel = perfil(request.user)
+    qs = consulta(request.user).filter(status__in=[Status.ENTREGUE, Status.CANCELADO])
+    contagens = {
+        "entregues": qs.filter(status=Status.ENTREGUE).count(),
+        "cancelados": qs.filter(status=Status.CANCELADO).count(),
+        "avaliados": qs.filter(status=Status.ENTREGUE, avaliacao__isnull=False).count(),
+    }
+    filtros = [
+        ("", "Todos"),
+        ("ENTREGUE", "Entregues"),
+        ("CANCELADO", "Cancelados"),
+        ("avaliados", "Avaliados"),
+        ("sem_avaliacao", "Sem avaliação"),
+    ]
+    filtro = request.GET.get("status", "")
+    if filtro not in dict(filtros):
+        filtro = ""
+    if filtro in (Status.ENTREGUE, Status.CANCELADO):
+        qs = qs.filter(status=filtro)
+    elif filtro in ("avaliados", "sem_avaliacao"):
+        qs = qs.filter(status=Status.ENTREGUE, avaliacao__isnull=(filtro == "sem_avaliacao"))
+    qs = qs.order_by("-criado_em", "-id")
+    return render(request, "historico.html", {"papel": papel, "pedidos": Paginator(qs, 30).get_page(request.GET.get("page")), "contagens": contagens, "filtro": filtro, "filtros": filtros})
 
 @login_required
 @require_POST
@@ -90,12 +113,12 @@ def avaliar(request, pk):
     pedido = get_object_or_404(Pedido.objects.select_for_update(), pk=pk, cliente=request.user, status=Status.ENTREGUE)
     if Avaliacao.objects.filter(pedido=pedido).exists():
         messages.info(request, "Este pedido já foi avaliado.")
-        return redirect("home")
+        return redirect("historico")
     form = AvaliacaoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         avaliacao = form.save(commit=False)
         avaliacao.pedido = pedido
         avaliacao.save()
         messages.success(request, "Obrigado pela sua avaliação!")
-        return redirect("home")
+        return redirect("historico")
     return render(request, "avaliar.html", {"pedido": pedido, "form": form})

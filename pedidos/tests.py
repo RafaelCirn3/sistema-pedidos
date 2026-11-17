@@ -73,7 +73,39 @@ class FluxoTest(TestCase):
         response = self.client.get("/")
         self.assertEqual(list(response.context["pedidos"]), [self.pedido, segundo])
         transicao(self.pedido, self.cozinha, Status.ENTREGUE)
-        self.assertEqual(list(self.client.get("/").context["pedidos"]), [segundo, self.pedido])
+        self.assertEqual(list(self.client.get("/").context["pedidos"]), [segundo])
+        self.assertEqual(list(self.client.get(reverse("historico")).context["pedidos"]), [self.pedido])
+
+    def test_historico_filtra_finalizados_e_avaliacoes(self):
+        entregue = registrar(self.cliente, self.refeicao.pk)
+        cancelado = registrar(self.cliente, self.refeicao.pk)
+        avaliado = registrar(self.cliente, self.refeicao.pk)
+        alheio = registrar(self.outro, self.refeicao.pk)
+        transicao(entregue, self.cozinha, Status.ENTREGUE)
+        transicao(cancelado, self.cliente, Status.CANCELADO)
+        transicao(avaliado, self.cozinha, Status.ENTREGUE)
+        transicao(alheio, self.cozinha, Status.ENTREGUE)
+        Avaliacao.objects.create(pedido=avaliado, nota=0, comentario="Minha avaliação")
+        url = reverse("historico")
+        self.client.force_login(self.cliente)
+        for filtro in ("", "ENTREGUE", "CANCELADO", "avaliados"):
+            self.assertEqual(list(self.client.get("/", {"status": filtro}).context["pedidos"]), [self.pedido])
+        resposta = self.client.get(url)
+        self.assertEqual(list(resposta.context["pedidos"]), [avaliado, cancelado, entregue])
+        self.assertContains(resposta, "Minha avaliação")
+        self.assertContains(resposta, "0/5")
+        self.assertContains(resposta, reverse("avaliar", args=[entregue.pk]))
+        self.assertEqual(list(self.client.get(url, {"status": "avaliados"}).context["pedidos"]), [avaliado])
+        self.assertEqual(list(self.client.get(url, {"status": "sem_avaliacao"}).context["pedidos"]), [entregue])
+        self.assertEqual(list(self.client.get(url, {"status": "CANCELADO"}).context["pedidos"]), [cancelado])
+        self.assertEqual(list(self.client.get(url, {"status": "PENDENTE"}).context["pedidos"]), [avaliado, cancelado, entregue])
+        self.client.force_login(self.cozinha)
+        self.assertEqual(list(self.client.get("/").context["pedidos"]), [self.pedido])
+        self.assertEqual(list(self.client.get(url).context["pedidos"]), [alheio, avaliado, cancelado, entregue])
+        self.assertNotContains(self.client.get(url), reverse("avaliar", args=[entregue.pk]))
+
+    def test_historico_requer_login(self):
+        self.assertRedirects(self.client.get(reverse("historico")), "/entrar/?next=/pedidos/historico/")
 
     def test_admin_registra_e_audita(self):
         admin = User.objects.create_superuser("admin", password="senha-teste")

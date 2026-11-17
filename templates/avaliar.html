@@ -1,2 +1,2 @@
 {% extends "base.html" %}
-{% block content %}<section class="card auth"><span class="eyebrow">PEDIDO #{{ pedido.pk }}</span><h1>Como foi sua refeição?</h1><p>{{ pedido.refeicao.nome }}</p><form method="post">{% csrf_token %}{{ form.as_p }}<button class="primary full">Enviar avaliação</button></form><a class="outline button full" href="{% url 'home' %}">Voltar</a></section>{% endblock %}
+{% block content %}<section class="card auth"><span class="eyebrow">PEDIDO #{{ pedido.pk }}</span><h1>Como foi sua refeição?</h1><p>{{ pedido.refeicao.nome }}</p><form method="post">{% csrf_token %}{{ form.as_p }}<button class="primary full">Enviar avaliação</button></form><a class="outline button full" href="{% url 'historico' %}">Voltar ao histórico</a></section>{% endblock %}

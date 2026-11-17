@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Histórico de pedidos | Mesa{% endblock %}
+{% block content %}
+<section class="hero"><span class="eyebrow">{% if papel == 'cozinha' %}PAINEL DA COZINHA{% else %}ÁREA DO CLIENTE{% endif %}</span><h1>Histórico de pedidos</h1><p>Consulte pedidos finalizados e avaliações anteriores.</p></section>
+<div class="stats">
+  <a class="card stat" href="?status=ENTREGUE"><span>Entregues</span><strong>{{ contagens.entregues }}</strong></a>
+  <a class="card stat" href="?status=CANCELADO"><span>Cancelados</span><strong>{{ contagens.cancelados }}</strong></a>
+  <a class="card stat" href="?status=avaliados"><span>Avaliados</span><strong>{{ contagens.avaliados }}</strong></a>
+</div>
+<section><div class="section-head"><h2>Pedidos finalizados</h2><a class="outline button" href="{% url 'home' %}">Voltar aos pendentes</a></div>
+<nav class="filters" aria-label="Filtrar histórico">{% for valor, nome in filtros %}<a href="?{% if valor %}status={{ valor }}{% endif %}" {% if filtro == valor %}class="active" aria-current="page"{% endif %}>{{ nome }}</a>{% endfor %}</nav>
+<div class="orders">{% for pedido in pedidos %}{% include "pedido_card.html" %}{% empty %}<div class="card empty"><h3>Nenhum pedido neste histórico.</h3><p>Os pedidos finalizados aparecerão aqui.</p></div>{% endfor %}</div>
+{% include "pedido_paginacao.html" %}</section>
+{% endblock %}

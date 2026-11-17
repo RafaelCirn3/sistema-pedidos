@@ -1,0 +1,3 @@
+{% if pedidos.paginator.num_pages > 1 %}
+<div class="pagination">{% if pedidos.has_previous %}<a href="?{% if filtro %}status={{ filtro|urlencode }}&amp;{% endif %}page={{ pedidos.previous_page_number }}">Anterior</a>{% endif %}<span>Página {{ pedidos.number }} de {{ pedidos.paginator.num_pages }}</span>{% if pedidos.has_next %}<a href="?{% if filtro %}status={{ filtro|urlencode }}&amp;{% endif %}page={{ pedidos.next_page_number }}">Próxima</a>{% endif %}</div>
+{% endif %}
