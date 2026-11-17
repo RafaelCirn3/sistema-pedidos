@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Criar conta | Mesa{% endblock %}
+{% block content %}
+<section class="auth card"><span class="eyebrow">ÁREA DO CLIENTE</span><h1>Crie sua conta.</h1><p>Preencha seus dados para começar a pedir refeições.</p>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button class="primary full">Criar conta</button></form>
+<p class="muted small">Já tem conta? <a href="{% url 'login' %}"><strong>Entrar</strong></a>.</p></section>
+{% endblock %}

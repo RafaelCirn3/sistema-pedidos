@@ -3,5 +3,5 @@
 {% block content %}
 <section class="auth card"><span class="eyebrow">BEM-VINDO</span><h1>Seu pedido começa aqui.</h1><p>Entre para acessar o sistema de refeições.</p>
 <form method="post">{% csrf_token %}{{ form.as_p }}<input type="hidden" name="next" value="{{ next }}"><button class="primary full">Entrar</button></form>
-<p class="muted small">Não possui acesso? Procure o administrador.</p></section>
+<p class="muted small">Ainda não tem conta? <a href="{% url 'cadastro' %}"><strong>Cadastre-se como cliente</strong></a>.</p></section>
 {% endblock %}

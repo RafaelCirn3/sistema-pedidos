@@ -6,12 +6,16 @@ from usuarios.permissions import exigir, perfil
 from .models import Pedido, HistoricoStatus, Status
 
 @transaction.atomic
-def registrar(cliente, refeicao_id, responsavel=None):
+def registrar(cliente, refeicao_id, responsavel=None, opcoes_ids=()):
     exigir(cliente, "cliente")
     refeicao = Refeicao.objects.select_for_update().filter(pk=refeicao_id, disponivel=True).first()
     if not refeicao:
         raise ValidationError("Esta refeição não está mais disponível.")
-    pedido = Pedido.objects.create(cliente=cliente, refeicao=refeicao)
+    ids = set(opcoes_ids)
+    opcoes = list(refeicao.opcoes.filter(pk__in=ids))
+    if len(opcoes) != len(ids):
+        raise ValidationError("Alguma opção não pertence a este prato ou foi removida. Atualize o cardápio.")
+    pedido = Pedido.objects.create(cliente=cliente, refeicao=refeicao, opcoes_selecionadas=[opcao.nome for opcao in opcoes])
     HistoricoStatus.objects.create(pedido=pedido, responsavel=responsavel or cliente, status_novo=Status.PENDENTE)
     return pedido
 

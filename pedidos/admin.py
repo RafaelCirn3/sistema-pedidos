@@ -25,7 +25,7 @@ class PedidoAdmin(admin.ModelAdmin):
     search_fields = ("cliente__username", "cliente__first_name", "refeicao__nome")
     actions = ["confirmar_entrega", "cancelar_pedidos"]
     def get_readonly_fields(self, request, obj=None):
-        return ("status", "criado_em", "entregue_em", "cancelado_em") + (("cliente", "refeicao") if obj else ())
+        return ("status", "criado_em", "entregue_em", "cancelado_em") + (("cliente", "refeicao", "opcoes_selecionadas") if obj else ())
     def has_add_permission(self, request):
         return request.user.is_superuser
     def save_model(self, request, obj, form, change):

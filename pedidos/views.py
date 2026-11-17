@@ -33,16 +33,18 @@ def home(request):
     else:
         qs = qs.order_by("-criado_em", "-id")
     from django.core.paginator import Paginator
-    return render(request, "home.html", {"papel": papel, "pedidos": Paginator(qs, 30).get_page(request.GET.get("page")), "refeicoes": Refeicao.objects.filter(disponivel=True), "contagens": contagens, "filtro": filtro, "status_choices": Status.choices})
+    return render(request, "home.html", {"papel": papel, "pedidos": Paginator(qs, 30).get_page(request.GET.get("page")), "refeicoes": Refeicao.objects.filter(disponivel=True).prefetch_related("opcoes"), "contagens": contagens, "filtro": filtro, "status_choices": Status.choices})
 
 @login_required
 @require_POST
 def novo(request):
     exigir(request.user, "cliente")
     try:
-        registrar(request.user, int(request.POST.get("refeicao", "")))
+        registrar(request.user, int(request.POST.get("refeicao", "")), opcoes_ids=[int(i) for i in request.POST.getlist("opcoes")])
         messages.success(request, "Pedido registrado! A cozinha já pode visualizá-lo.")
-    except (ValidationError, ValueError):
+    except ValidationError as exc:
+        messages.error(request, exc.message)
+    except ValueError:
         messages.error(request, "Selecione uma refeição disponível.")
     return redirect("home")
 

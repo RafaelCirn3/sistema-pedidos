@@ -13,6 +13,8 @@ services:
   web:
     build: .
     env_file: .env
+    volumes:
+      - media:/app/media
     depends_on:
       db:
         condition: service_healthy
@@ -21,3 +23,4 @@ services:
     restart: unless-stopped
 volumes:
   pgdata:
+  media:

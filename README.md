@@ -16,7 +16,9 @@ Acesse http://localhost:8000. As migrations e arquivos estáticos são preparado
 
 ## Configuração inicial
 
-No painel /admin/, cadastre refeições e usuários. Os grupos **Cliente** e **Cozinha** são criados automaticamente pela migration. Atribua exatamente um grupo operacional a cada usuário; não marque usuários operacionais como staff ou superusuários. Administradores usam o Django Admin.
+No painel /admin/, cadastre usuários da cozinha e atribua o grupo **Cozinha**. Os grupos **Cliente** e **Cozinha** são criados automaticamente pela migration. Clientes podem criar sua conta em /cadastro/ com nome, e-mail, WhatsApp e senha; o e-mail é usado para login. Não marque usuários operacionais como staff ou superusuários. Administradores usam o Django Admin.
+
+A cozinha gerencia o cardápio em /cardapio/, incluindo fotos JPG/PNG/WebP de até 5 MB, disponibilidade e opções de seleção (checkboxes). As escolhas marcadas ficam registradas no pedido, mesmo se a opção for renomeada ou excluída. O volume Docker media preserva as imagens entre recriações do contêiner; inclua-o no backup.
 
 Clientes solicitam refeições disponíveis, acompanham pedidos próprios, cancelam pendências e avaliam entregas. A cozinha consulta todos os pedidos, prioriza pendentes em FIFO e confirma entregas ou cancelamentos. A fila se atualiza automaticamente a cada 30 segundos enquanto visível.
 

@@ -8,6 +8,7 @@ class Status(models.TextChoices):
     CANCELADO = "CANCELADO", "Cancelado"
 
 class Pedido(models.Model):
+    opcoes_selecionadas = models.JSONField(default=list, blank=True)
     cliente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="pedidos")
     refeicao = models.ForeignKey(Refeicao, on_delete=models.PROTECT)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDENTE)

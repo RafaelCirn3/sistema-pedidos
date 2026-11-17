@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Editar prato | Mesa{% endblock %}
+{% block content %}
+<section class="hero"><a href="{% url 'cardapio' %}">← Voltar ao cardápio</a><h1>{% if refeicao.pk %}Editar prato{% else %}Novo prato{% endif %}</h1><p>Personalize o prato e as escolhas disponíveis ao cliente.</p></section>
+<section class="card editor"><form method="post" enctype="multipart/form-data" id="prato-form">{% csrf_token %}
+{% if refeicao.imagem %}<img class="editor-image" src="{% url 'prato_imagem' refeicao.pk %}" alt="{{ refeicao.nome }}">{% endif %}
+{{ form.as_p }}
+<h2>Opções personalizadas</h2><p>Adicione opções independentes que o cliente poderá marcar. Exemplo: salada, feijão ou molho.</p>
+{{ opcoes.management_form }}{{ opcoes.non_form_errors }}
+<div id="opcoes-lista">{% for opcao in opcoes %}<div class="option-row">{{ opcao.id }}{{ opcao.nome.errors }}{{ opcao.nome }}<label class="delete-option">{{ opcao.DELETE }} Remover</label></div>{% endfor %}</div>
+<template id="opcao-template"><div class="option-row">{{ opcoes.empty_form.id }}{{ opcoes.empty_form.nome }}<label class="delete-option">{{ opcoes.empty_form.DELETE }} Remover</label></div></template>
+<button type="button" class="outline full" id="adicionar-opcao">+ Adicionar checkbox</button>
+<button type="submit" class="primary full">Salvar prato</button></form></section>
+<script>
+const total = document.getElementById("id_opcoes-TOTAL_FORMS");
+const lista = document.getElementById("opcoes-lista");
+document.getElementById("adicionar-opcao").addEventListener("click", () => {
+  const index = Number(total.value);
+  if (index >= 60) return;
+  lista.insertAdjacentHTML("beforeend", document.getElementById("opcao-template").innerHTML.replaceAll("__prefix__", index));
+  total.value = index + 1;
+  lista.lastElementChild.querySelector('input[type="text"]').focus();
+});
+</script>
+{% endblock %}

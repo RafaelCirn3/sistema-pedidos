@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar cardápio | Mesa{% endblock %}
+{% block content %}
+<section class="hero"><span class="eyebrow">PAINEL DA COZINHA</span><h1>Gerenciar cardápio</h1><p>Cadastre refeições, fotos e opções adicionais.</p></section>
+<div class="section-head"><a class="outline button" href="{% url 'home' %}">Voltar à fila</a><a class="primary button" href="{% url 'prato_novo' %}">+ Novo prato</a></div>
+<section class="grid menu-grid">{% for prato in refeicoes %}<article class="card meal">
+{% if prato.imagem %}<img class="meal-image" src="{% url 'prato_imagem' prato.pk %}" alt="{{ prato.nome }}" loading="lazy">{% else %}<div class="meal-placeholder">Sem foto</div>{% endif %}
+<span class="badge {% if prato.disponivel %}entregue{% else %}cancelado{% endif %}">{% if prato.disponivel %}Disponível{% else %}Indisponível{% endif %}</span>
+<h3>{{ prato.nome }}</h3><p>{{ prato.descricao }}</p><p class="small">Opções: {% for opcao in prato.opcoes.all %}{{ opcao.nome }}{% if not forloop.last %}, {% endif %}{% empty %}Nenhuma{% endfor %}</p>
+<a class="outline button full" href="{% url 'prato_editar' prato.pk %}">Editar prato</a>
+</article>{% empty %}<p class="card">Nenhum prato cadastrado. Adicione o primeiro!</p>{% endfor %}</section>
+{% endblock %}
